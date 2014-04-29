@@ -1,0 +1,85 @@
+// January, 2014
+// This file is an Insteon "hello world"... 
+// Not pretty, but may be useful for initial testing 
+// Before running this, you should ensure you have linked your Insteon device to your Insteon Serial modem.
+// Also ensure that you substitute the Insteon switch ID's below (three hex bytes) with your own.
+
+
+#include "SoftwareSerial.h"
+SoftwareSerial insteonSerial(5, 4);
+
+int inByte = 0;         // incoming serial byte
+int zeroByte = 0x00;    // I use this because if I do "insteonSerial.write (0);" instead I get a compile error
+
+void setup()
+{
+  // start serial port at 19200 bps (this is the speed for Insteon modem)
+  insteonSerial.begin(19200);  // use software serial for pins 2 and 3 to communicate with the Insteon Modem
+                               // soft serial lets us keep the arduino's serial port open for debugging if we wish 
+}
+
+void loop()
+{
+  // if we get a valid byte, read analog ins:
+  while (insteonSerial.available() > 0) {
+    // get incoming byte:
+    inByte = insteonSerial.read();
+  }
+
+
+delay (1000); // Delay for 1 second
+
+
+ // Turn the Living:Lamp on using HEX command:
+ // 02 62 19 08 52 05 11 FF            (NOTE: replace the "19 08 52" with your own Insteon ID)
+ // Note, each hex value is converted to decimal (below) before it is written via serial.
+ 
+  insteonSerial.write (2);   // 02 hex 
+  delay (50); 
+  insteonSerial.write (98);  // 62 hex
+  delay (50); 
+  insteonSerial.write (25);  // 19 hex (1st byte of Insteon ID) 
+  delay (50); 
+  insteonSerial.write (8);   // 08 hex (2nd byte of InsteonID) 
+  delay (50); 
+  insteonSerial.write (82);  // 52 hex (3rd byte of InsteonID) 
+  delay (50); 
+  insteonSerial.write (5);   // 05 hex
+  delay (50); 
+  insteonSerial.write (17);  // 11 hex (ON command)
+  delay (50); 
+  insteonSerial.write (255); // FF hex (ON command)
+ 
+  // if we get a valid byte, read analog ins:
+  while (insteonSerial.available() > 0) {
+    // get incoming byte:
+    inByte = insteonSerial.read();
+  }
+ 
+ 
+ 
+delay (1000);  // Delay for one second
+ 
+ 
+ 
+  // Turn off Living:Lamp using HEX command
+  // 02 62 19 08 52 05 13 00   (note: replace "19 08 52" with your own insteon ID)
+    
+  insteonSerial.write (2);   // 02 hex
+  delay (40); 
+  insteonSerial.write (98);  // 62 hex
+  delay (40); 
+  insteonSerial.write (25);  // 19 hex  (1st byte of Insteon ID)
+  delay (40); 
+  insteonSerial.write (8);   // 08 hex  (2nd byte of Insteon ID)
+  delay (40); 
+  insteonSerial.write (82);  // 52 hex  (3rd byte of Insteon ID)
+  delay (40); 
+  insteonSerial.write (5);   // 05 hex
+  delay (40); 
+  insteonSerial.write (19);  // 13 hex  (OFF command)
+  delay (40); 
+  insteonSerial.write (zeroByte);   // 00 hex   (OFF command)
+}
+
+
