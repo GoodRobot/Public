@@ -1,0 +1,33 @@
+// January, 2014
+// This sketch is for testing the dry contact sensing capability of the small
+// Arduino home automation shield (v3). 
+//
+// NOTE: This detects whether the two terminals for each channel are connected (useful if you have a switch or contact sensor for example). 
+//       It is for dry contact only, so do not apply voltage voltage to the terminals when in this mode.
+//
+// Whenever any of the three channels sense a closed contact then the 
+// Arduino's onboard LED lights up
+//
+// There is only one pin (pin 7) that is sensing dry contact.
+//
+// There are no jumper settings for this version (v3) of the shield.
+//
+// CAUTION: do not leave the shield plugged into your arduino if Pin 7 is configured as an output. This can create a short circuit if the pin is held high and the contact sensing pins are connected
+
+void setup() {                
+  // initialize Pin 9 as an input (this is what we use for dry contact sensing).
+  // Pin 13 has an LED connected on most Arduino boards:
+  pinMode(7, INPUT);     // this is the pin connected to our dry contact leads
+  digitalWrite(7, HIGH); // turn on pullup resistors (required, since there is no resistor to the dry contact lines on the board)
+  pinMode(13, OUTPUT);   // this is the Arduino's built-in LED
+}
+
+void loop() {
+  digitalWrite (13, LOW);          // default is that we assume there are no dry contacts closed, so light is off
+  
+  if (digitalRead (7) == LOW) {   // check whether button is pushed or not
+    digitalWrite(13, HIGH);         // Button is not pushed, so keep the LED OFF
+  }
+  delay(2);                       // wait for 2ms before checking the status again (keeps light lit for at least 1ms at a time)
+  
+}
