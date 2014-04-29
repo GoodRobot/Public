@@ -1,0 +1,33 @@
+// January, 2014
+// This sketch is for testing the pushbutton on the smaller revised
+// Arduino home automation shield (v3). 
+// Whenever the pushbutton is pressed atop the shield this sketch 
+// it lights the Arduino's onboard LED.
+//
+// There are no jumpers aboard this home automation shield 
+// 
+// CAUTION: do not turn pin 6 to an output pin while the shield is plugged in. Doing so could cause a short circuit to 
+//          ground if you put the pin high and press the button.
+
+
+void setup() {                
+  // initialize Pin 6 as an input (this is what we use for button sensing).
+  // Pin 13 has an LED connected on most Arduino boards:
+  pinMode(6, INPUT);     // this is the pin connected to our pushbutton
+  digitalWrite(6, HIGH); // turn on pullup resistors (required, since there is no resistor to the button on the board)
+  pinMode(13, OUTPUT);   // this is the Arduino's built-in LED
+  Serial.begin(9600);
+}
+
+void loop() {
+  if (digitalRead (6) == HIGH) {   // check whether button is pushed or not
+    digitalWrite(13, LOW);         // Button is not pushed, so keep the LED OFF
+    Serial.println("Button is off");
+  }
+  else {
+    digitalWrite(13, HIGH);        // Button is pushed, so turn the LED ON
+    Serial.println("Button is on");
+  };  
+
+ 
+}
