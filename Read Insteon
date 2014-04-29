@@ -1,0 +1,118 @@
+// This sketch is designed to receive Insteon protocol commands through
+// arduino (via a serial modem/PLM). 
+//
+// This sketch parses insteon standard messages only (based on length and sequencing) and uses the detection of 0x02 (start message code) to determine whether
+// a new message has begun as expected based on what it know about the message length.
+
+int inByte[26]= {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};    // for storing incoming serial bytes
+int zeroByte = 0x00;    // I use this because if I do "Serial.write (0);" instead I get a compile error
+int startMsg = 0x02;    // Every insteon message begins with this
+int msgLength = 30;     // Used to assign an expected length for the message... starts out high so that we don't prematurely trigger an end-of-message
+int i = 0;              // Temporary looping variable
+int count=0;            // this is a counter that keeps track of what byte of the message we are reading
+
+const int Table[11][2] = {    //This table stores the codes for the different message types and what length to expect for each
+  {0x50, 11},   // 0x50 means its a standard insteon message, total length 11 (9 bytes plus the 0x02 0x50)
+  {0x51, 25},   // 0x51 means its an extended length insteon message, total length 25  (23 bytes plus the 0x02 0x50)
+  {0x62, 9},    // 0x62 means it's echoing back an insteon command that we sent, total length 9 (or would be 23 if it was an extended message, but we asume STANDARD ONLY for now)
+  {0x52, 4},    // 0x52 means an X10 message was received
+  {0x53, 10},   // 0x53 means ALL-linking Completed
+  {0x54, 3},    // 0x54 means Button Event was reported
+  {0x55, 2},    // 0x55 means a User Reset was detected
+  {0x56, 7},    // 0x56 means an ALL-Link Cleanup Failure was reported
+  {0x57, 10},   // 0x57 means an All-Link Record response
+  {0x58, 3}     // 0x58 means an All-Link Cleanup status report
+};
+
+#include "SoftwareSerial.h"
+SoftwareSerial insteonSerial(5, 4);  // This is what we use to send/receive insteon commands using the home automation shield
+
+
+void setup()
+{
+  // start serial port at 19200 bps:
+  insteonSerial.begin(19200);  //for insteon commands
+  Serial.begin(19200);         //serial output to arduino IDE so we can see what's going on
+  delay(1000);
+  Serial.println("Waiting for new message...");
+  // Make sure we're not in monitor mode
+  //insteonSerial.write (0x02); 
+  //insteonSerial.write (0x6B);
+  //insteonSerial.write (zeroByte); //set all flags to zero. Alternatively, setting this to 0x40 puts it into monitor mode (I think)
+}
+
+void loop()
+{
+  // Read new bytes as long as there's something available to read
+  while (insteonSerial.available() > 0) {
+    
+    // get incoming byte and print it
+    inByte[count] = insteonSerial.read();
+    Serial.print("Serial Print: ");
+    Serial.println(inByte[count]);
+    
+    // check if this is the start of a new message 
+    if (inByte[count] == startMsg) {
+      if (count == 0) {
+        Serial.println("Message started as expected");  // Messages begin with 0x02, so if "count" was reset to 0 (which happens after the previous message was completed), then that's exactly what we expect to see.
+      }
+      else
+      {
+        Serial.println("Start of new message is UNEXPECTED!"); // For some reason we are seeing a 0x02 that's not at the first byte of our message then let us know that we received a unexpected "start message" byte
+      }
+      count = 0;  // since we see a new message we need to ensure that count is zero'd regardless  (note: this could be problematic if our insteon messagee contains a 0x02 in it, more testing required)
+    };
+    
+    // if this is the second byte, then we set up an expected message length (we could use 0x02 start bit only, but this is a nice thing to double check)
+    if (count==1) {                             // Check if this is the second byte
+      for (i=0; i<10;i++){                      // Loop through the table to find out what kind of message this is
+        if (inByte[count] == Table[i][0]){      // See if we can find a match with the byte we just read
+         msgLength = Table[i][1]-1;             // If a match is found, then use the corresponding expected message length from our table (note: subract 1 since count starts at "0" while our lookup table uses numbers expected bytes starting at 1)
+        };
+      };
+    };
+    
+    // After each byte we read we need to increment our counter
+    count = count +1;
+    
+    // Check if we've gone beyond the expected message length
+    if (count > msgLength) {             // Check if we have exceeded the expected length of our insteon message?
+     count = 0;                          // If we have exceeded the expected message length, then lets reset the counter and prepare for a new message
+     // If the message we received was an Insteon Standard message, then lets print it out
+     if (inByte[1] == 0x50) {   
+      Serial.println("");
+      Serial.print("Device: ");
+      Serial.print(inByte[2],HEX);
+      Serial.print(" ");
+      Serial.print(inByte[3],HEX);
+      Serial.print(" ");
+      Serial.print(inByte[4],HEX);
+      Serial.print(", Just gave an ");
+      if(inByte[9]==0x13) {        //note: could also have used 19 (decimal) instead e.g.:  if(inByte[9]==19)  
+        Serial.print("OFF");
+      }
+      else if(inByte[9]==0x11) {   //this is 0x11 in hex or 17 in decimal
+        Serial.print("ON");
+      } 
+      else {
+      Serial.print("?");           //this was something other than an ON/OFF message
+      }   
+      Serial.print(" command: ");
+      Serial.print(inByte[9],HEX);
+      Serial.print(" ");
+      Serial.print(inByte[10],HEX);
+      Serial.print(", to this Device: ");
+      Serial.print(inByte[5],HEX);
+      Serial.print(" ");
+      Serial.print(inByte[6],HEX);     
+      Serial.print(" ");
+      Serial.println(inByte[7],HEX);
+      }; 
+      Serial.println("");                            //Insert a blank line
+      Serial.println("Waiting for new message...");  //Tell the user we're ready to receive the next message 
+    }; 
+  };
+ 
+};
+
+
