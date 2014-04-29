@@ -1,0 +1,31 @@
+// January, 2014
+// This sketch is for testing the relay output for the small version of the
+// Arduino home automation shield (v3). 
+// The relay is turned on for one second and then off for one second.
+// The Arduino's onboard LED is also turned on/off along with the relays.
+//
+// There are no jumpers required for this version (v3) of the shield
+//
+// The onboard relay is limited to switching low voltage / low current circuits (e.g. low current LEDs for example)
+// (typically your shield will have a maximum load of 100mA unless you have requested a more powerful relay).
+// By special request, we may provide a more expensive relay that allows you to switch loads up to up to 400mA.
+
+
+void setup() {                
+  // initialize the digital pin (pin 3) as an output to switch the relay.
+  // Pin 13 has an LED connected on most Arduino boards:
+  pinMode(3, OUTPUT);
+  pinMode(13, OUTPUT);  
+}
+
+void loop() {
+  digitalWrite(3, HIGH);    // turn relay on
+  digitalWrite(13, HIGH);   // set the LED on
+  
+  delay(1000);              // wait for a second
+
+  digitalWrite(3, LOW);    // turn relay off
+  digitalWrite(13, LOW);    // set the LED off
+
+  delay(1000);              // wait for a second
+}
