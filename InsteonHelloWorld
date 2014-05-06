@@ -80,6 +80,7 @@ delay (1000);  // Delay for one second
   insteonSerial.write (19);  // 13 hex  (OFF command)
   delay (40); 
   insteonSerial.write (zeroByte);   // 00 hex   (OFF command)
+
 }
 
 
