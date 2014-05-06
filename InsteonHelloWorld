@@ -54,6 +54,7 @@ delay (1000); // Delay for 1 second
   while (insteonSerial.available() > 0) {
     // get incoming byte:
     inByte = insteonSerial.read();
+  
   }
  
  
