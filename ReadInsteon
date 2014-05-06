@@ -112,7 +112,6 @@ void loop()
       Serial.println("Waiting for new message...");  //Tell the user we're ready to receive the next message 
     }; 
   };
- 
 };
 
 
