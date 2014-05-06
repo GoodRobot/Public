@@ -30,4 +30,5 @@ void loop() {
   }
   delay(2);                       // wait for 2ms before checking the status again (keeps light lit for at least 1ms at a time)
   
+
 }
