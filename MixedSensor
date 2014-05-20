@@ -1,0 +1,46 @@
+//May 20th, 2014:
+//This is the first draft of the Justice Project that allows for the added parts to the
+//demo. This allows for an LED attachment and also a buzzer. 
+//TOP SECRET
+
+//int pinInput = 12; //The pin that the input is coming from
+int pinLED = 2; //The pin that the button is connected to
+int pinChirp = 9; //The pin that the noise maker is connected to
+int pinGRN = 7;   // Ground pin
+int photoCellReading;
+int photoCellPin = A1;
+int delay_Time = 1000; //One second delay
+
+void setup(){
+  //pinMode(pinInput, INPUT);  //this is the pin connected to our pushbutton
+  //digitalWrite(pinButton, HIGH); //turn on pullup resistors
+  pinMode(pinLED, OUTPUT); //Set up the LED pin
+  pinMode(pinGRN, OUTPUT); //Set up the ground pin
+  pinMode(pinChirp,OUTPUT); //Set up the sound buzzer
+  Serial.begin(9600);
+}
+
+void loop (){
+    
+    photoCellReading = analogRead(photoCellPin);  //This is the raw data that comes from the photocell
+    
+    Serial.print("Analog Reading = "); //Prints the photocell readings in the serial monitor
+    Serial.println(photoCellReading);
+    
+    if (photoCellReading > 500){       //Arbitrarily picked number -- when you cover the photocell the number decreases and vice versa
+      digitalWrite(pinGRN,LOW);        //Turn ground pin OFF
+      digitalWrite(pinLED, HIGH);      //Turn on LED
+      digitalWrite(pinChirp,HIGH);     //Make a sound
+      delay(delay_Time);               //Delay
+      digitalWrite(pinLED, LOW);       //Loop LED and Sound continuously
+      digitalWrite(pinChirp,LOW);
+      delay(delay_Time);
+    }
+    else{
+      digitalWrite(pinGRN,HIGH);        //Turn everything off
+      digitalWrite(pinLED, LOW);
+      digitalWrite(pinChirp,LOW);
+    }
+    
+    delay(delay_Time);                   //delay
+}
